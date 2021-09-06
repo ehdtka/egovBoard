@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="boardMapper">
+	
+    <select id="boardList" resultType="BoardVO">
+		SELECT *
+		FROM (SELECT bno, title, content, writer, regDate, fileName, viewCount, ROWNUM rnum
+		        FROM board
+		        <include refid="search"/>
+		        ORDER BY bno DESC) a
+		where rnum &gt;= #{startRow} and rnum &lt;= #{endRow}
+    </select>
+	
+    <insert id="boardWrite">
+        INSERT INTO board(bno, title, content, writer, fileName)
+        VALUES(board_seq.NEXTVAL, #{title}, #{content}, #{writer}, #{fileName})
+    </insert>
+    
+    <delete id="boardDelete">
+        DELETE 
+        FROM board
+        WHERE bno = #{bno}
+    </delete>
+
+    <update id="boardUpdate">
+        UPDATE board
+        SET
+        title = #{title},
+        content = #{content},
+        writer = #{writer},
+        fileName = #{fileName}
+        Where bno = #{bno}
+    </update>
+    
+    <select id="detailSelect" resultType="BoardVO">
+        SELECT *
+        FROM board
+        WHERE bno = #{bno}
+    </select>
+    
+    <update id="ViewCount">
+        UPDATE board
+        SET 
+        viewCount = viewCount + 1
+        WHERE bno = #{bno}
+    </update>
+    
+    <!-- List Count All -->
+    <select id="listCount" resultType="int">
+        SELECT COUNT(*)
+        FROM board
+    </select>
+    
+    <sql id="search">
+        <if test="searchKey != null and searchValue != null">
+            <if test="searchKey == 'title'">
+           		WHERE title LIKE '%' || #{searchValue} || '%'
+            </if>
+            <if test="searchKey == 'writer'">
+           		WHERE title LIKE '%' || #{searchValue} || '%'
+            </if>
+        </if>
+    </sql>
+</mapper>
